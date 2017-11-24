@@ -97,12 +97,52 @@ if (DataSource=="Excel"){
         
 
 
-header <- dashboardHeader(title = "Campaign Manager")
+header <- dashboardHeader(title = "Campaign Manager",
+                          dropdownMenu(type = "messages",
+                                       messageItem(
+                                               from = "Sales Dept",
+                                               message = "Sales are steady this month."
+                                       ),
+                                       messageItem(
+                                               from = "New User",
+                                               message = "How do I register?",
+                                               icon = icon("question"),
+                                               time = "13:45"
+                                       ),
+                                       messageItem(
+                                               from = "Support",
+                                               message = "The new server is ready.",
+                                               icon = icon("life-ring"),
+                                               time = "2014-12-01"
+                                       )
+                          ),
+                          dropdownMenu(type = "notifications",
+                                       notificationItem(
+                                               text = "5 new users today",
+                                               icon("users")
+                                       ),
+                                       notificationItem(
+                                               text = "12 items delivered",
+                                               icon("truck"),
+                                               status = "success"
+                                       ),
+                                       notificationItem(
+                                               text = "Server load at 86%",
+                                               icon = icon("exclamation-triangle"),
+                                               status = "warning"
+                                       )
+                          ))
 
 sidebar <- dashboardSidebar(
         sidebarMenu(
                 menuItem("Plan Summary", tabName = "PlanSum", icon = icon("dashboard")),
-                menuItem("Scenario Planning", icon = icon("th"), tabName = "Scen")
+                menuItem("Scenario Planning", icon = icon("th"), tabName = "Scen"),
+                menuItem("Reporting", icon=icon("line-chart"), tabName="Rpt"),
+                menuItem("Global Forecasting", icon=icon("globe"),
+                         menuSubItem("Live Daily Plan", icon=icon("calendar"), tabName="Live_Plan"),
+                         menuSubItem("Quarterly Planning", icon=icon("thermometer-full"), tabName="Qtr_Plan"),
+                         menuSubItem("Budget Planning", icon=icon("balance-scale"), tabName="Budget_Plan")
+                         )
         )
         
 )
@@ -190,6 +230,9 @@ body <- dashboardBody(
                                              )
                                              
                                          )),
+                                tabPanel("Timeline",
+                                         plotOutput("timeline")
+                                         ),
                                 tabPanel("Campaign Summary",
                                          column(width=8,
                                                 tableOutput("sumtable"))#plotlyOutput("PlanCurr2")),
@@ -289,6 +332,21 @@ body <- dashboardBody(
                                    uiOutput("Check")
                                    )
                 )
+                
+                ),
+                tabItem(tabName = "Rpt",
+                        h6("Reporting Views go here")
+                ),
+                
+                
+                tabItem(tabName = "Live_Plan",
+                        h6("Live Daily Auto Plan goes here")
+                ),
+                tabItem(tabName = "Qtr_Plan",
+                        h6("Quarterly Readiness Planning goes here")
+                ),
+                tabItem(tabName = "Budget_Plan",
+                        h6("FF/SF Planning goes here")
                 )
         )
         
@@ -807,6 +865,41 @@ server <- function(input, output, session) {
                 #print(values$Batch2)
         })
         
+        output$timeline <- renderPlot({
+                if(input$Exec==0)
+                        return()
+                
+                InpFrame <- left_join(values$Camp1,values$Batch1)
+                InpFrame$`Batch Send Date` <- as_date(InpFrame$`Batch Send Date`)
+                
+                if(input$SubmitChanges==0){
+                      p <-  ggplot(InpFrame)+
+                                geom_col(aes(`Batch Send Date`,`Batch Vol`, 
+                                             group=interaction(CampaignID,Format),
+                                             fill=interaction(CampaignID,Format),
+                                             position='stack'))
+                        
+                        
+                }
+                if(input$SubmitChanges!=0){
+                        InpFrame2 <- left_join(values$Camp2,values$Batch2)
+                        InpFrame2$`Batch Send Date` <- as_date(InpFrame2$`Batch Send Date`)
+                        InpFrame <- bind_rows(InpFrame,InpFrame2)
+                        
+                        p <-  ggplot(InpFrame)+
+                                geom_col(aes(`Batch Send Date`,`Batch Vol`, 
+                                             group=interaction(CampaignID,Format),
+                                             fill=interaction(CampaignID,Format),
+                                             position='stack'))+
+                                facet_wrap(~ForecastID,nrow=2)
+                }
+                
+                
+                
+                p
+                #ggplotly(p)
+        })
+        
         
         ###ScenarioPlanning
         
@@ -933,6 +1026,8 @@ server <- function(input, output, session) {
                                    selected = 1)
                 
         })
+        
+
         
         
 }
