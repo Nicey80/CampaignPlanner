@@ -261,12 +261,12 @@ body <- dashboardBody(
                                 ),
                         fluidRow(
                         tabBox(title="Plan", id="tabset2", height='500px', width = 12,
-                               tabPanel("Plan Summary",
+                               tabPanel("Plan Summary", value = "CampPlanSum",
                         column(width=12,
                                 tableOutput("CampTable")
                         )
                                ),
-                        tabPanel("Edit Plan",
+                        tabPanel("Edit Plan", value = "EditPlan",
                                 box(width=7,title="Campaign Plan", solidHeader = TRUE,
                                     status = "primary",
                                     actionButton("NewCamp","Add Campaign",icon=icon("plus-square")),
@@ -898,6 +898,11 @@ server <- function(input, output, session) {
                 
                 p
                 #ggplotly(p)
+        })
+        
+        
+        observeEvent(input$EditP, {
+            updateTabsetPanel(session = session, inputId = "tabset2", selected = "EditPlan")
         })
         
         
