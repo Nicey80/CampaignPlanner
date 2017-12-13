@@ -257,7 +257,10 @@ body <- dashboardBody(
                                                 actionButton("confirmsave", "Save Scenario"),
                                                 actionButton("cancel", "Cancel")
                                         )),
-                                actionButton("SubChgs", "Submit Changes", icon=icon("handshake-o"))
+                                actionButton("SubChgs", "Submit Changes", icon=icon("handshake-o")),
+                                bsModal("SubChg","Submit Changes","SubChgs", size="small",
+                                        wellPanel("This Workflow is currently under development")
+                                        )
                                 ),
                         fluidRow(
                         tabBox(title="Plan", id="tabset2", height='500px', width = 12,
@@ -326,7 +329,9 @@ body <- dashboardBody(
                                                                 choices = c("Profile","Outcome"),
                                                                 inline=TRUE),
                                                    plotlyOutput("ScGraph")),
-                                          tabPanel("Tabular"))
+                                          tabPanel("Tabular",
+                                            tableOutput("SCTable"))
+                                            )
                              ),
                             column(width=2,
                                    uiOutput("Check")
@@ -1012,21 +1017,35 @@ server <- function(input, output, session) {
                         
                         p <- ggplot(PF)+
                                 stat_summary(aes(Type,Vol,group=ScenarioName, fill= ScenarioName),geom='col',
-                                             fun.y='sum', position='dodge')#+
-                                #stat_summary(aes(Type,Vol, label=Vol), vjust=-0.3, size=3.5,geom='text',
-                                             #fun.y='sum', position='dodge')
-                        
+                                             fun.y='sum', position='dodge')
                 }
                 
                 ggplotly(p)
                 
         })
         
+        output$SCTable <- renderTable({ 
+            if(input$ExecScen==0)
+                return()
+            
+            TF <- valuesscenario$Forecasts1
+            
+            TF <- TF %>%
+                filter(ScenarioName %in% input$Scenario) %>%
+                group_by(ScenarioName) %>%
+                summarise(Voice_Calls=sum(`Voice Calls`),
+                          Web_Visits=sum(`Web Visits`),
+                          BB_Sales=sum(`Voice BB Sales`+`Web BB Sales`),
+                          TV_Sales=sum(`Voice TV Sales`+`Web TV Sales`),
+                          Mob_Sales=sum(`Voice Mob Sales`+`Web Mob Sales`))
+            
+        }, striped=TRUE, bordered=TRUE, digits=0)
+        
         output$Check <- renderUI({
                 if(input$ExecScen==0)
                         return()
                 
-                checkboxGroupInput("Metric","Metrics", 
+                radioButtons("Metric","Metrics", 
                                    choices=as.list(unique(valuesscenario$Metrics)),
                                    selected = 1)
                 
