@@ -966,9 +966,9 @@ server <- function(input, output, session) {
                 
                 CN <- Camp_tidy[,-c(1:4)]
                 
-                print(CN)
+                #print(CN)
                 CN2 <- colnames(CN)
-                print(CN2)
+                #print(CN2)
                 
                 valuesscenario$Metrics <- CN2
                 print(valuesscenario$Metrics)
@@ -989,6 +989,9 @@ server <- function(input, output, session) {
                 if(input$ExecScen==0)
                         return()
                 
+                if(is.null(input$Scenario))
+                    return()
+            
                 if(input$GType=="Profile"){
                 
                 #list scenarios
@@ -1015,9 +1018,10 @@ server <- function(input, output, session) {
                                 filter(ScenarioName %in% input$Scenario) %>%
                                 filter(Type %in% input$Metric)
                         
-                        p <- ggplot(PF)+
-                                stat_summary(aes(Type,Vol,group=ScenarioName, fill= ScenarioName),geom='col',
-                                             fun.y='sum', position='dodge')
+                        p <- ggplot(PF,aes(Type,Vol,group=ScenarioName, fill= ScenarioName))+
+                                stat_summary(geom='col',
+                                             fun.y='sum', width=0.4,position=position_dodge(width=0.5))+
+                            stat_summary(aes(label=..y..), fun.y=sum, geom="text", size=4, position = position_dodge(0.5))
                 }
                 
                 ggplotly(p)
@@ -1046,8 +1050,8 @@ server <- function(input, output, session) {
                         return()
                 
                 radioButtons("Metric","Metrics", 
-                                   choices=as.list(unique(valuesscenario$Metrics)),
-                                   selected = 1)
+                                   choices=as.list(unique(valuesscenario$Metrics))
+                                   )
                 
         })
         
