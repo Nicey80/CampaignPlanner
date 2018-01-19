@@ -369,7 +369,7 @@ body <- dashboardBody(
                         "You will then see the Plan summary graphically displayed for that area. You can manipulate
                         the plan by Clicking on the Edit Plan tab and changin the data within the data table. Just select
                         the cell and overtype with a new value. The table on the left edits global parameters, on the right
-                        the send plan. When you've made changes click on the button XXXX to see the updated plan in the graph.
+                        the send plan. When you've made changes click on the button 'Update Plot' to see the updated plan in the graph.
                         You can save the scenario to the database by clicking the save scenario button",
                         br(),
                         img(src="images/png2.PNG", width="1407px", height = "933px")
