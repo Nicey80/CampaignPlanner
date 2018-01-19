@@ -15,8 +15,9 @@ NewBPlan <- data.frame()
 batch_Forecast <- function(inpdata){
         
         library(lubridate)
-        CurveID <- RCID$CurveID[RCID$Func==inpdata$Func && RCID$SubFunc==inpdata$SubFunc]
-        Curve <- RCurves[,CurveID+1]        
+        CurveID <- RCID$CurveID[RCID$Func==inpdata$Func & RCID$SubFunc==inpdata$SubFunc]
+        Curve <- RCurves[,CurveID+1]
+
         
         B.Forecast.Voice.Calls <- inpdata$`Batch Vol`* inpdata$VoiceRR *Curve
         B.Forecast.Voice.BB <- B.Forecast.Voice.Calls * inpdata$VConvBB
@@ -28,6 +29,7 @@ batch_Forecast <- function(inpdata){
         B.Forecast.Web.TV <- B.Forecast.Web.Calls* inpdata$WConvTV
         B.Forecast.Web.Mob <- B.Forecast.Web.Calls* inpdata$WConvMob
         
+
         
         F.Days=nrow(B.Forecast.Voice.Calls)
         
@@ -135,6 +137,8 @@ header <- dashboardHeader(title = "Campaign Manager",
 
 sidebar <- dashboardSidebar(
         sidebarMenu(
+            menuItem("Instructions", icon=icon("question-circle"), tabName="Hlp",
+                     badgeLabel = "new", badgeColor = "green"),
                 menuItem("Plan Summary", tabName = "PlanSum", icon = icon("dashboard")),
                 menuItem("Scenario Planning", icon = icon("th"), tabName = "Scen"),
                 menuItem("Reporting", icon=icon("line-chart"), tabName="Rpt"),
@@ -143,6 +147,7 @@ sidebar <- dashboardSidebar(
                          menuSubItem("Quarterly Planning", icon=icon("thermometer-full"), tabName="Qtr_Plan"),
                          menuSubItem("Budget Planning", icon=icon("balance-scale"), tabName="Budget_Plan")
                          )
+
         )
         
 )
@@ -352,6 +357,33 @@ body <- dashboardBody(
                 ),
                 tabItem(tabName = "Budget_Plan",
                         h6("FF/SF Planning goes here")
+                ),
+                tabItem(tabName="Hlp",
+                        tabBox(title="Operating Instructions", id="tabset5", width = 12,
+                        tabPanel("Plan Summary",
+                        "The Plan Summary is intended as an overview of the currently submitted plan. 
+                        To Operate first select the Area and Sub Area to look at and then click Execute.",
+                        br(),
+                        img(src="images/png1.PNG", width="1389px", height = "266px"),
+                        br(),
+                        "You will then see the Plan summary graphically displayed for that area. You can manipulate
+                        the plan by Clicking on the Edit Plan tab and changin the data within the data table. Just select
+                        the cell and overtype with a new value. The table on the left edits global parameters, on the right
+                        the send plan. When you've made changes click on the button XXXX to see the updated plan in the graph.
+                        You can save the scenario to the database by clicking the save scenario button",
+                        br(),
+                        img(src="images/png2.PNG", width="1407px", height = "933px")
+                        ),
+                        tabPanel("Scenario Planning",
+                        "Load the data by selecting the area and sub area and then clicking Execute. This loads all the
+                        available scenarios which can be compared in the graph or table. Select the scenarios by adding 
+                        them in the choice box on the left and select the metric on the right",
+                        br(),
+                        img(src="images/png3.PNG", width="1397px", height = "593px")
+                        ),
+                        tabPanel("Other Items",
+                                 "The system is still under active development. Other tabs have yet to be populated with the appropriate working code")
+                        )
                 )
         )
         
